@@ -56,20 +56,17 @@
   (if (= n 0) #f
       (even? (- n 1))))
 
-(define (reverse lst);error! return nothing and is using assignment instead of recursion
-  (cond [(null? lst) '()])
-  (let ([receiver '()]
-	[helper '()]
-	[helperproc reverse])
-    (begin
-      (set! receiver (fetch-last lst))
-      (set! helper (copy-until-last-2 lst))
-      (if (not (null? (cdr lst)))
-	  (helperproc (cdr lst))))))
-
-(define (fetch-last lst);error! only return '()
+(define (reverse lst)
   (cond [(null? lst) '()]
-	[(null? (cdr lst)) '()]
+	[else (append (reverse (cdr lst)) (list (car lst)))]))
+
+(define (append a b)
+  (if (null? a) b
+      (cons (car a) (append (cdr a) b))))
+
+(define (fetch-last lst)
+  (cond [(null? lst) '()]
+	[(null? (cdr lst)) (car lst)]
 	[else (fetch-last (cdr lst))]))
 
 (define (copy-until-last-2 lst)
