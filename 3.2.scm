@@ -11,3 +11,39 @@
 		    (cons i (f (/ n i) i))]
 		   [else (f n (+ i 1))]))])
       (f n 2))))
+
+;;;3.2.3
+;;Impossible because named let can't take two lambda at the same time
+
+;;;3.2.4
+(define count-1 0)
+(define fibonacci-1
+  (lambda (n)
+    (let fib ([i n])
+      (cond
+       [(= i 0) 0]
+       [(= i 1) 1]
+       [else (+ (begin (set! count-1 (+ count-1 1)) (fib (- i 1)))
+		(begin (set! count-1 (+ count-1 1)) (fib (- i 2))))]))))
+(define count-2 0)
+(define fibonacci-2
+  (lambda (n)
+    (if (= n 0)
+	0
+	(let fib ([i n] [a1 1] [a2 0])
+	  (if (= i 1)
+	      a1
+	      (begin (set! count-2 (+ count-2 1))
+		     (fib (- i 1) (+ a1 a2) a1)))))))
+;;I tried both procedure inputing 10, they output the same value 55 with count-1 being 176 and count-2 being 9
+
+;;;3.2.5
+(define-syntax let
+  (syntax-rules ()
+    [(_ ((x e) ...) b1 b2 ...)
+     ((lambda (x ...) b1 b2 ...) e ...)]
+    [(_ name ((x e) ...) b1 b2 ...)
+     (letrec ((name (lambda (x ...) b1 b2 ...))) (name e ...))]))
+
+;;;3.2.6
+;;I think the error is that if used in that way (even! and odd!), since this version didn't pull (_ e) e out seperately, leaving everything to the last while allowing one (_ e) to be expanded into (let ((t e)) (if t t (_))), making even? no longer a tail call thus may have a risk of stack overflow (Just my guess, can't think of any other possibilities myself, really!)
