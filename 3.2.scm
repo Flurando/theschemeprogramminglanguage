@@ -47,3 +47,26 @@
 
 ;;;3.2.6
 ;;I think the error is that if used in that way (even! and odd!), since this version didn't pull (_ e) e out seperately, leaving everything to the last while allowing one (_ e) to be expanded into (let ((t e)) (if t t (_))), making even? no longer a tail call thus may have a risk of stack overflow (Just my guess, can't think of any other possibilities myself, really!)
+
+;;;3.2.7
+;;The most important problem to solve is that I have to make sure 2 is handled rightly and all the recursive calls are tail calls
+(define factor
+  (lambda (n)
+    (when (= n 1) 1)
+    (when (= n 2) 2)
+    (when (= n 3) 3)
+    (if (odd? n) ((let f ([n n] [i 3])
+		    (when (> i (sqrt n)) (list n))
+		    (let ([u (/ n i)])
+		      (if (integer? u) (cons i (f u i))
+			  (f n (+ i 2))))))
+	(let ([lst (let f ([n1 n])
+		     (let ([u (/ n1 2)])
+		       (set! n u)
+		       (if (even? u) (cons 2 (f u))
+			   (list 2))))])
+	  (let g ([n n] [i 3])
+	    (when (> i (sqrt n)) (cons n lst))
+	    (let ([u (/ n i)])
+	      (if (integer? u) (cons i (g u i))
+		  (g n (+ i 2)))))))))
