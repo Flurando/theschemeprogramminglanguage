@@ -24,7 +24,8 @@
 		(if (zero? lsa) (check #f)
 		    (* lsa (loop (cdr ls)))))))
 	0)))
-    
-    
-     
-	   
+
+;;;3.3.3
+;;;3.3.4
+;;;3.3.5
+;;give up, this part is too hard for me now(checked the answer but don't understand. Mmm, just spent nearly a whole day to figure out why the example output hey! again and again ... Maybe I would make it finally by putting two or three more days on this anyway, at least understand the answer, but that just doesn't worth it -- I am not a junior coder, just a starter who could only write newbie programs which prints helloworld to screen or guess a number between 1 and 100 -- there are much more things I could do in a day. Anyway, I will put these 3 questions here and come back later. Let me proceed.
