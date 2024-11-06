@@ -12,15 +12,15 @@
   (let ([lst '()])
     (lambda (msg . args)
       (case msg
-	[('empty) (null? lst)]
-	[('push!) (cons (car args) lst)]
-	[('top) (car lst)]
-	[('pop) (set! lst (cdr lst))]
-	[('ref) (let loop ([l lst]
+	[(empty) (null? lst)]
+	[(push!) (cons (car args) lst)]
+	[(top) (car lst)]
+	[(pop) (set! lst (cdr lst))]
+	[(ref) (let loop ([l lst]
 			   [c (car args)])
 		  (if (= c 0) (car lst)
 		      (loop (cdr lst) (- c 1))))]
-	[('set!) (let loop ([l lst]
+	[(set!) (let loop ([l lst]
 			   [c (car args)])
 		  (if (= c 0) (set-car! lst (cadr args))
 		      (loop (cdr lst) (- c 1))))]
@@ -35,11 +35,11 @@
 	       (set! p (append p (car args))))]
 	    [(eq? opt 'getq)
 	     (begin
-	       (if (null? p) (assertion-violation #f "wrong"))
+	       (if (null? p) (raise-exception (make-exception-with-message "wrong")))
 	       (car p))]
 	    [(eq? opt 'delq!)
 	     (begin
-	       (if (null? p) (assertion-violation #f "wrong"))
+	       (if (null? p) (raise-exception (make-exception-with-message "wrong")))
 	       (set! p (cdr p)))]
 	    [(eq? opt 'emptyq?)
 	     (begin
@@ -50,13 +50,13 @@
   (let ([lst (make-vector n)])
     (lambda (msg . args)
       (case msg
-	[('empty) (null? lst)]
-	[('push!) (cons (car args) lst)]
-	[('top) (car lst)]
-	[('pop) (set! lst (cdr lst))]
-	[('ref) (let ([index (car args)])
+	[(empty) (null? lst)]
+	[(push!) (cons (car args) lst)]
+	[(top) (car lst)]
+	[(pop) (set! lst (cdr lst))]
+	[(ref) (let ([index (car args)])
 		  (vector-ref lst index))]
-	[('set!) (let ([index (car args)]
+	[(set!) (let ([index (car args)]
 		       [v (cadr args)])
 		   (vector-set! lst index v))]
 	[else "oops"]))))
