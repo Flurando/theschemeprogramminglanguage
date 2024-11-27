@@ -1,4 +1,16 @@
 (use-modules (ice-9 format))
+(use-modules (srfi srfi-9))
+
+(define-record-type matrix
+  (%make-matrix vec)
+  %matrix?
+  (vec matrix-raw))
+
+(define make-matrix
+  (lambda (row column)
+    (if (and (number? row) (number? column))
+	(%make-matrix (make-vector row (make-vector column 0))) 
+	(error "expect number: row and column"))))
 
 (define vector-all-number?
   (lambda (v)
@@ -18,16 +30,13 @@
 
 (define matrix?
   (lambda (x)
-    (and (vector? x)
-         (> (vector-length x) 0)
-	 (vector? (vector-ref x 0))
-	 (let ([num (vector-length (vector-ref x 0))])
-	   (let loop ([index 0])
-	     (if (>= index (vector-length x)) #t
-		 (if (and (vector? (vector-ref x index)) (= num (vector-ref x index)) (vector-all-number? (vector-ref x index)))
-		     (loop (1+ index))
-		     #f))))
-	 
+    (and (%matrix? x)
+	 (let loop ([index 0])
+	   (if (>= index row)
+	       #t
+	       (if (vector-all-number? (vector-ref (matrix-raw x) index))
+		   (loop (1+ index))
+		   #f))))))
 
 (define matrix-rows
   (lambda (x)
@@ -102,4 +111,39 @@
 ;;somehow nasty but I think it works...though untested
 
 ;;;12.1.3
-;;
+;;It seems to be impossible to simply use srfi-9 to achieve the goal. The real solution I can think of is to write a module(aka library in standard) and export the procedures without % prefix. However I admit that I don't really understand the modular system in guile, nor the library in standard. So.. maybe...skip for now.
+
+;;;12.1.4
+;;I tried to use macro but failed because I don't know any way to rename a symbol at runtime whike letting the macro expander allow the whole block and trust that. So I end up making a procedure like this.
+(define make-one-to-one-matrix-calc
+  (lambda (calc-procedure)
+     (let* ([vector-calc
+	     (lambda (a b)
+	       (let* ([len (vector-length a)]
+		      [output (make-vector len 0)])
+		 (let loop ([index 0])
+		   (unless (>= index len)
+		     (vector-set! output (calc-procedure (vector-ref a index) (vector-ref b index)) index)
+		     (loop (1+ index))))
+		 output)))
+	    [matrix-calc
+	     (lambda (a b)
+	       (let ([output (%make-matrix (vector-copy (matrix-raw a)))])
+		 (let loop ([index 0])
+		   (unless (>= index (vector-length (matrix-raw a)))
+		     (vector-set! (matrix-raw output) index (vector-calc (vector-ref (matrix-raw a) index) (vector-ref (matrix-raw b) index)))))
+		 output))]
+	    [(calc
+	      (lambda (a b)
+		(if (and (number? a) (number? b))
+		    (+ a b)
+		    (matrix-calc a b))))])
+       calc)))
+
+(define add (make-one-to-one-matrix-calc +))
+(define sub (make-one-to-one-matrix-calc -))
+
+;;;12.1.5
+;;Just change make-vector to make-list and vector-ref to list-ref!
+;;The nice part is that we can change the size of matrix easier then
+;;However, one would take more place and require longer to be looked up
